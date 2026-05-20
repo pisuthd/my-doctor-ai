@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { profileStore } from './profileStore'
 import { registerSessionsIpcHandlers, initSessions } from './sessions'
 import { registerDocumentsHandlers, registerDocumentsOcrHandler } from './tools/documents'
+import { getDocumentsTool, searchDocumentsTool } from './tools/documents'
 import { toolsStore, getToolsSystemPrompt } from './toolsStore'
 
 // ============================================
@@ -361,12 +362,18 @@ app.whenReady().then(async () => {
         { role: 'user', content: toolsPrompt + '\n\n' + message }
       ]
 
+      // Get enabled tools based on Documents tool being enabled
+      const enabledTools = toolsStore.getEnabledTools()
+      const hasDocumentsTool = enabledTools.some(t => t.id === '1')
+      const tools = hasDocumentsTool ? [getDocumentsTool, searchDocumentsTool] : []
+      
       const result = completion({
         modelId: modelId,
         history: conversationHistory,
         stream: true,
         kvCache: true,
         captureThinking: true,
+        tools: tools.length > 0 ? tools : undefined,
       })
 
       let fullResponse = ''
