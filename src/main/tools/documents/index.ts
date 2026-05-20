@@ -2,7 +2,7 @@
 export { documentsStore } from './store'
 export { registerDocumentsHandlers, registerDocumentsOcrHandler } from './handlers'
 
-// Tool definitions for AI (compatible with QVAC SDK types)
+// Tool definitions for AI with execute functions embedded
 export const getDocumentsTool = {
   type: 'function' as const,
   name: 'get_documents',
@@ -12,6 +12,40 @@ export const getDocumentsTool = {
     properties: {},
     required: [],
   },
+  execute: async () => {
+    try {
+      const docs = (global as any).documentsStore?.getDocuments()
+      
+      if (!docs || docs.length === 0) {
+        return JSON.stringify({
+          success: true,
+          documents: [],
+          message: 'No documents stored yet. User can add documents through the Documents page.'
+        }, null, 2)
+      }
+      
+      // Return summary (not full content for brevity)
+      const summary = docs.map((doc: any) => ({
+        id: doc.id,
+        name: doc.name,
+        type: doc.type,
+        contentLength: doc.content.length,
+        preview: doc.content.substring(0, 200) + (doc.content.length > 200 ? '...' : ''),
+        createdAt: doc.createdAt
+      }))
+      
+      return JSON.stringify({
+        success: true,
+        documents: summary,
+        count: docs.length
+      }, null, 2)
+    } catch (error) {
+      return JSON.stringify({
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
+    }
+  }
 }
 
 export const searchDocumentsTool = {
@@ -28,73 +62,36 @@ export const searchDocumentsTool = {
     },
     required: ['query'],
   },
-}
-
-// Execute functions for tool calls
-export async function executeGetDocuments(): Promise<string> {
-  try {
-    const docs = (global as any).documentsStore?.getDocuments()
-    
-    if (!docs || docs.length === 0) {
+  execute: async (args: Record<string, unknown>) => {
+    try {
+      const query = args.query as string
+      const docs = (global as any).documentsStore?.searchDocuments(query)
+      
+      if (!docs || docs.length === 0) {
+        return JSON.stringify({
+          success: true,
+          results: [],
+          message: `No documents found matching: "${query}"`
+        }, null, 2)
+      }
+      
+      // Return matching documents
       return JSON.stringify({
         success: true,
-        documents: [],
-        message: 'No documents stored yet. User can add documents through the Documents page.'
+        results: docs.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          type: doc.type,
+          content: doc.content,
+          relevance: 'high'
+        })),
+        count: docs.length
       }, null, 2)
-    }
-    
-    // Return summary (not full content for brevity)
-    const summary = docs.map((doc: any) => ({
-      id: doc.id,
-      name: doc.name,
-      type: doc.type,
-      contentLength: doc.content.length,
-      preview: doc.content.substring(0, 200) + (doc.content.length > 200 ? '...' : ''),
-      createdAt: doc.createdAt
-    }))
-    
-    return JSON.stringify({
-      success: true,
-      documents: summary,
-      count: docs.length
-    }, null, 2)
-  } catch (error) {
-    return JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
-  }
-}
-
-export async function executeSearchDocuments(args: { query: string }): Promise<string> {
-  try {
-    const query = args.query
-    const docs = (global as any).documentsStore?.searchDocuments(query)
-    
-    if (!docs || docs.length === 0) {
+    } catch (error) {
       return JSON.stringify({
-        success: true,
-        results: [],
-        message: `No documents found matching: "${query}"`
-      }, null, 2)
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      })
     }
-    
-    // Return matching documents
-    return JSON.stringify({
-      success: true,
-      results: docs.map((doc: any) => ({
-        id: doc.id,
-        name: doc.name,
-        type: doc.type,
-        content: doc.content,
-        relevance: 'high'
-      })),
-      count: docs.length
-    }, null, 2)
-  } catch (error) {
-    return JSON.stringify({
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error'
-    })
   }
 }
