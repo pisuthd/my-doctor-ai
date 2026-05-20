@@ -12,9 +12,15 @@ interface Profile {
 
 export default function MainLayout({ profile }: { profile: Profile }) {
   return (
-    <div style={{ display: 'flex', minHeight: '100vh' }}>
+    <div style={{ display: 'flex' }}>
       <Sidebar profileName={profile.name} />
-      <main style={{ flex: 1, background: '#f7f7fc' }}>
+      <main style={{ 
+        flex: 1, 
+        background: '#f7f7fc',
+        marginLeft: 200,
+        minHeight: '100vh',
+        boxSizing: 'border-box'
+      }}>
         <Outlet />
       </main>
     </div>

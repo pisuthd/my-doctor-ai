@@ -29,15 +29,19 @@ export default function Sidebar({ profileName }: { profileName: string }) {
   return (
     <div
       style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
         width: 200,
-        minHeight: '100vh',
+        height: '100vh',
         background: '#fff',
         borderRight: '1px solid #e0e0f0',
         padding: '24px 16px',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: sansFont,
-        position: 'relative',
+        zIndex: 100,
+        boxSizing: 'border-box',
       }}
     >
       {/* Teal top accent */}

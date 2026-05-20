@@ -3,10 +3,33 @@
 ## Architecture Overview
 - **Framework**: Electron with electron-vite
 - **Frontend**: React 19 + TypeScript
-- **Styling**: TailwindCSS with blue theme
+- **Styling**: Inline styles with design system (no Tailwind on pages)
 - **Animations**: Framer Motion
 - **Drag & Drop**: @dnd-kit
 - **Structure**: Main process / Preload / Renderer separation
+
+## Design System
+
+### Colors
+```javascript
+const BLUE = '#1A1AE8'
+const TEAL = '#3EC4C0'
+const NAVY = '#0a0a5c'
+const MUTED = '#9999bb'
+const LIGHT_BLUE = '#f7f7fc'
+```
+
+### Typography
+```javascript
+const monoFont = "'Space Mono', monospace"
+const sansFont = "'DM Sans', sans-serif"
+```
+
+### Common Patterns
+- SectionLabel component: uppercase label with monoFont
+- TealBar: 3px teal accent at top of cards
+- Numbered badges with monoFont
+- Left-aligned content in main area
 
 ## Directory Structure
 ```
@@ -16,41 +39,32 @@ src/
 └── renderer/       # React frontend
     └── src/
         ├── components/
+        │   ├── Sidebar/
+        │   └── MainLayout/
+        ├── pages/
+        │   ├── LoadingScreen/
         │   ├── ProfileSelector/
         │   ├── Dashboard/
         │   ├── Sessions/
         │   ├── Chat/
-        │   ├── Loading/
-        │   └── DocumentManager/
-        ├── pages/
-        ├── hooks/
-        ├── stores/
+        │   ├── Documents/
+        │   └── Tools/
         ├── App.tsx
-        ├── main.tsx
-        └── index.css
+        └── main.tsx
 ```
 
 ## Page Structure
 1. **LoadingScreen** - Model loading with progress
-2. **ProfileSelector** - Profile selection/creation with contextual forms
+2. **ProfileSelector** - Profile selection/creation (loads profiles internally)
 3. **MainLayout** - Sidebar + Content area
    - **Dashboard** - Health insights, recent chats
-   - **Sessions** - Table list of all conversations
+   - **Sessions** - Table list of conversations
    - **Chat** - Conversation interface
-   - **Tools** - Enable integrations
+   - **Documents** - Upload and file list
+   - **Tools** - Toggle cards for integrations
 
 ## Key Technical Decisions
-- Use React Router for page navigation
-- State management with Zustand or React Context
-- Framer Motion for page transitions and micro-animations
-- @dnd-kit for document upload drag & drop
-
-## Design Patterns in Use
-- Component-based architecture
-- Page-based routing
-- Contextual form validation based on profile type
-
-## Component Relationships
-- Main process → Preload → Renderer (IPC communication)
-- App.tsx manages page routing
-- Pages wrap shared layout (Sidebar + Content)
+- Use HashRouter for Electron (client-side routing)
+- Profile loading moved to ProfileSelector component
+- Inline styles for consistent design system
+- App.tsx manages app state (loading → profile → main)
