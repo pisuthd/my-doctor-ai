@@ -16,11 +16,13 @@ interface Profile {
   name: string
   type: ProfileType
   age?: number
+  createdAt: Date
 }
 
 function App() {
   const [appState, setAppState] = useState<'loading' | 'profile' | 'main'>('loading')
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [profiles, setProfiles] = useState<Profile[]>([])
 
   const handleLoadingComplete = () => {
     setAppState('profile')
@@ -31,12 +33,23 @@ function App() {
     setAppState('main')
   }
 
+  const handleProfileCreate = (profileData: Omit<Profile, 'id' | 'createdAt'>) => {
+    const newProfile: Profile = {
+      ...profileData,
+      id: Date.now().toString(),
+      createdAt: new Date(),
+    }
+    setProfiles((prev) => [...prev, newProfile])
+    setProfile(newProfile)
+    setAppState('main')
+  }
+
   if (appState === 'loading') {
     return <LoadingScreen onComplete={handleLoadingComplete} />
   }
 
   if (appState === 'profile' || !profile) {
-    return <ProfileSelector onSelect={handleProfileSelect} />
+    return <ProfileSelector profiles={profiles} onSelect={handleProfileSelect} />
   }
 
   return (
