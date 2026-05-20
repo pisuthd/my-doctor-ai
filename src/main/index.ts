@@ -5,6 +5,7 @@ import icon from '../../resources/icon.png?asset'
 import { profileStore } from './profileStore'
 import { registerSessionsIpcHandlers, initSessions } from './sessions'
 import { registerDocumentsHandlers, registerDocumentsOcrHandler } from './tools/documents'
+import { toolsStore, getToolsSystemPrompt } from './toolsStore'
 
 // ============================================
 // QVAC AI Model Management
@@ -265,6 +266,15 @@ app.whenReady().then(async () => {
 
   ipcMain.on('ping', () => console.log('pong'))
 
+  // Tools IPC handlers
+  ipcMain.handle('tools:getAll', () => {
+    return toolsStore.getTools()
+  })
+
+  ipcMain.handle('tools:setEnabled', (_, toolId: string, enabled: boolean) => {
+    return toolsStore.setToolEnabled(toolId, enabled)
+  })
+
   // Profile IPC handlers
   ipcMain.handle('profiles:getAll', () => {
     return profileStore.getAll()
@@ -342,10 +352,13 @@ app.whenReady().then(async () => {
     try {
       ensureMainSession(profileSlug)
       
+      // Get system prompt based on enabled tools
+      const toolsPrompt = getToolsSystemPrompt()
+      
       // Build conversation history
       const conversationHistory = [
         ...history.map((h: any) => ({ role: h.role, content: h.content })),
-        { role: 'user', content: message }
+        { role: 'user', content: toolsPrompt + '\n\n' + message }
       ]
 
       const result = completion({

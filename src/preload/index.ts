@@ -67,6 +67,11 @@ const api = {
       ipcRenderer.invoke('sessions:saveMessages', profileSlug, sessionSlug, messages),
   },
   
+  tools: {
+    getAll: () => ipcRenderer.invoke('tools:getAll'),
+    setEnabled: (toolId: string, enabled: boolean) => ipcRenderer.invoke('tools:setEnabled', toolId, enabled),
+  },
+  
   documents: {
     list: () => ipcRenderer.invoke('documents:list'),
     get: (docId: string) => ipcRenderer.invoke('documents:get', docId),

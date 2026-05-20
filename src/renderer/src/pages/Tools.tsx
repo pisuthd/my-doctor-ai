@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 const BLUE = '#1A1AE8'
@@ -96,20 +96,38 @@ function ToolCard({ tool, onToggle }: { tool: Tool; onToggle: () => void }) {
 }
 
 export default function Tools() {
-  const [tools, setTools] = useState<Tool[]>([
-    { id: '1', name: 'Documents', description: 'Upload medical documents, notes, and PDFs. AI can read and reference them in conversations.', enabled: true, status: 'available' },
-    { id: '2', name: 'Clinic Scheduling', description: 'Schedule appointments with local clinics directly from chat', enabled: false, status: 'coming_soon' },
-    { id: '3', name: 'Medication Reminders', description: 'Set reminders for taking medications', enabled: false, status: 'coming_soon' },
-    { id: '4', name: 'Health Records', description: 'Connect to your electronic health records', enabled: false, status: 'coming_soon' },
-    { id: '5', name: 'Emergency Contacts', description: 'Quick access to emergency services and contacts', enabled: false, status: 'coming_soon' },
-  ])
+  const [tools, setTools] = useState<Tool[]>([])
+  const [loading, setLoading] = useState(true)
 
-  const toggleTool = (id: string) => {
-    setTools((prev) =>
-      prev.map((tool) =>
-        tool.id === id && tool.status === 'available' ? { ...tool, enabled: !tool.enabled } : tool
-      )
-    )
+  // Load tools from backend on mount
+  useEffect(() => {
+    const loadTools = async () => {
+      try {
+        const loadedTools = await window.api.tools.getAll()
+        setTools(loadedTools)
+      } catch (error) {
+        console.error('Failed to load tools:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    loadTools()
+  }, [])
+
+  const toggleTool = async (id: string) => {
+    const tool = tools.find(t => t.id === id)
+    if (!tool || tool.status !== 'available') return
+
+    const newEnabled = !tool.enabled
+    
+    try {
+      await window.api.tools.setEnabled(id, newEnabled)
+      setTools(prev => prev.map(t => 
+        t.id === id ? { ...t, enabled: newEnabled } : t
+      ))
+    } catch (error) {
+      console.error('Failed to toggle tool:', error)
+    }
   }
 
   return (
@@ -122,18 +140,24 @@ export default function Tools() {
         </h1>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {tools.map((tool, index) => (
-          <motion.div
-            key={tool.id}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.05 }}
-          >
-            <ToolCard tool={tool} onToggle={() => toggleTool(tool.id)} />
-          </motion.div>
-        ))}
-      </div>
+      {loading ? (
+        <div style={{ padding: 24, textAlign: 'center', color: MUTED }}>
+          Loading...
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {tools.map((tool, index) => (
+            <motion.div
+              key={tool.id}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <ToolCard tool={tool} onToggle={() => toggleTool(tool.id)} />
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

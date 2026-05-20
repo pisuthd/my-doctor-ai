@@ -35,6 +35,14 @@ export interface AIStatus {
   error?: string
 }
 
+export interface Tool {
+  id: string
+  name: string
+  description: string
+  enabled: boolean
+  status: 'available' | 'coming_soon'
+}
+
 export interface ProfileAPI {
   profiles: {
     getAll: () => Promise<Profile[]>
@@ -60,6 +68,10 @@ export interface ProfileAPI {
     clearMessages: (profileSlug: string, sessionSlug: string) => Promise<{ success: boolean }>
     loadMessages: (profileSlug: string, sessionSlug: string) => Promise<Message[]>
     saveMessages: (profileSlug: string, sessionSlug: string, messages: Message[]) => Promise<{ success: boolean }>
+  }
+  tools: {
+    getAll: () => Promise<Tool[]>
+    setEnabled: (toolId: string, enabled: boolean) => Promise<boolean>
   }
   documents: {
     list: () => Promise<any[]>
