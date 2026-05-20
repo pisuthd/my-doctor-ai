@@ -10,9 +10,9 @@ const monoFont = "'Space Mono', monospace"
 const sansFont = "'DM Sans', sans-serif"
 
 const navItems = [
-  { path: '/', label: 'Dashboard', num: '01' },
-  { path: '/sessions', label: 'Sessions', num: '02' },
-  { path: '/chat', label: 'New Chat', num: '03' },
+  { path: '/chat', label: 'Chat', num: '01' },
+  { path: '/', label: 'Dashboard', num: '02' },
+  { path: '/sessions', label: 'Sessions', num: '03' },
   { path: '/documents', label: 'Documents', num: '04' },
   { path: '/tools', label: 'Tools', num: '05' },
 ]
@@ -58,6 +58,7 @@ export default function Sidebar({ profileName }: { profileName: string }) {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === '/'}
             style={({ isActive }) => ({
               display: 'flex',
               alignItems: 'center',
