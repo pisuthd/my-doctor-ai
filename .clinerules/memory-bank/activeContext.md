@@ -1,32 +1,32 @@
 # Active Context
 
 ## Current Work Focus
-- Building UI components and pages for the chat app
+- Phase 3: AI model loading with QVAC SDK
 
 ## Recent Changes
-- Added TailwindCSS 4.x with @tailwindcss/vite plugin
-- Added Framer Motion for animations
-- Added @dnd-kit for drag & drop functionality
-- Updated memory bank with project requirements
+- Phase 3: Added QVAC AI model loading with download support
+- Model auto-downloads if missing from GitHub releases
+- Dashboard shows real AI status and uptime
+- Model stored at `{userData}/medpsy-1.7b-q4_k_m-imat.gguf`
 
 ## Next Steps
-1. Create page components structure (Loading, ProfileSelector, MainLayout, Dashboard, Sessions, Chat, DocumentManager)
-2. Build profile selection flow with contextual forms
-3. Implement main layout with sidebar navigation
-4. Create all page components
+1. Integrate chat with AI model
+2. RAG implementation for document analysis
 
 ## Active Decisions and Considerations
-- Using React Router for page navigation
-- TailwindCSS for styling with blue gradient theme
-- Framer Motion for page transitions and animations
-- @dnd-kit for document upload drag & drop
+- Using QVAC SDK for AI model management
+- Model downloaded on-demand if not found
+- Download progress shown in Dashboard
+- Model file ignored in Git (.gguf pattern)
 
 ## Important Patterns and Preferences
 - Blue gradient theme (Slack-style)
 - Component-based page structure
 - Phase-by-phase development with Git commits
+- IPC handlers for main process communication
 
 ## Learnings and Project Insights
-- electron-vite template provides good foundation
-- TailwindCSS v4 uses @tailwindcss/vite plugin instead of PostCSS
-- @dnd-kit requires separate packages for core, sortable, and utilities
+- QVAC SDK provides loadModel/unloadModel for local GGUF models
+- Electron app.getPath('userData') for persistent storage
+- IPC handle for async main-renderer communication
+- Preload script exposes API via contextBridge
