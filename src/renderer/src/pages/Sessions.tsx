@@ -44,21 +44,19 @@ export default function Sessions() {
   const navigate = useNavigate()
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
-  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null)
 
-  // Get current profile from localStorage
+  // Load sessions on mount (after getting profile)
   useEffect(() => {
-    const savedProfileId = localStorage.getItem('currentProfileId')
-    setCurrentProfileId(savedProfileId)
-  }, [])
-
-  // Load sessions
-  useEffect(() => {
-    if (!currentProfileId) return
-
     const loadSessions = async () => {
+      const savedProfileId = localStorage.getItem('currentProfileId')
+      
+      if (!savedProfileId) {
+        setLoading(false)
+        return
+      }
+
       try {
-        const list = await window.api.sessions.list(currentProfileId)
+        const list = await window.api.sessions.list(savedProfileId)
         setSessions(list)
       } catch (error) {
         console.error('Failed to load sessions:', error)
@@ -68,7 +66,7 @@ export default function Sessions() {
     }
 
     loadSessions()
-  }, [currentProfileId])
+  }, [])
 
   const handleSessionClick = (slug: string) => {
     navigate(`/chat?session=${slug}`)

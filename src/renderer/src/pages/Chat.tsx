@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useSearchParams, useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 
 const BLUE = '#1A1AE8'
@@ -19,6 +19,13 @@ interface ChatMessage {
   thinking?: string
 }
 
+interface Session {
+  slug: string
+  name: string
+  createdAt: string
+  messageCount: number
+}
+
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <p style={{ fontFamily: monoFont, fontSize: 11, letterSpacing: '0.14em', color: MUTED, textTransform: 'uppercase', marginBottom: 8 }}>
@@ -28,7 +35,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 export default function Chat() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const navigate = useNavigate()
   const sessionSlug = searchParams.get('session') || 'main'
   
   const [messages, setMessages] = useState<ChatMessage[]>([])
@@ -36,24 +44,38 @@ export default function Chat() {
   const [loading, setLoading] = useState(false)
   const [streamingContent, setStreamingContent] = useState('')
   const [streamingThinking, setStreamingThinking] = useState('')
-  const [currentProfileId, setCurrentProfileId] = useState<string | null>(null)
+  const [sessions, setSessions] = useState<Session[]>([])
+  const [showSessionDropdown, setShowSessionDropdown] = useState(false)
   
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Get current profile
+  // Load sessions for dropdown
   useEffect(() => {
-    const savedProfileId = localStorage.getItem('currentProfileId')
-    setCurrentProfileId(savedProfileId)
+    const loadSessions = async () => {
+      const profileId = localStorage.getItem('currentProfileId')
+      if (!profileId) return
+      
+      try {
+        const list = await window.api.sessions.list(profileId)
+        setSessions(list)
+      } catch (error) {
+        console.error('Failed to load sessions:', error)
+      }
+    }
+    
+    loadSessions()
   }, [])
 
   // Load messages for session
   useEffect(() => {
-    if (!currentProfileId) return
+    const profileId = localStorage.getItem('currentProfileId')
+    if (!profileId) return
 
     const loadMessages = async () => {
       try {
-        const msgs = await window.api.sessions.loadMessages(currentProfileId, sessionSlug)
+        const msgs = await window.api.sessions.loadMessages(profileId, sessionSlug)
         setMessages(msgs)
       } catch (error) {
         console.error('Failed to load messages:', error)
@@ -61,7 +83,7 @@ export default function Chat() {
     }
 
     loadMessages()
-  }, [currentProfileId, sessionSlug])
+  }, [sessionSlug])
 
   // Set up streaming listeners
   useEffect(() => {
@@ -106,8 +128,26 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, streamingContent])
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setShowSessionDropdown(false)
+      }
+    }
+    
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const handleSessionChange = (slug: string) => {
+    setSearchParams({ session: slug })
+    setShowSessionDropdown(false)
+  }
+
   const handleSend = async () => {
-    if (!input.trim() || loading || !currentProfileId) return
+    const profileId = localStorage.getItem('currentProfileId')
+    if (!input.trim() || loading || !profileId) return
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
@@ -131,7 +171,7 @@ export default function Chat() {
     }))
 
     try {
-      await window.api.ai.sendMessage(currentProfileId, sessionSlug, userMessage.content, history)
+      await window.api.ai.sendMessage(profileId, sessionSlug, userMessage.content, history)
     } catch (error) {
       console.error('Failed to send message:', error)
       setLoading(false)
@@ -145,14 +185,85 @@ export default function Chat() {
     }
   }
 
+  const currentSessionName = sessions.find(s => s.slug === sessionSlug)?.name || sessionSlug
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', fontFamily: sansFont }}>
       {/* Header */}
       <div style={{ padding: '24px 32px', borderBottom: '1px solid #e0e0f0' }}>
-        <SectionLabel>Chat</SectionLabel>
-        <h1 style={{ fontFamily: sansFont, fontSize: 28, fontWeight: 300, color: NAVY, margin: 0, lineHeight: 1.2 }}>
-          <strong style={{ fontWeight: 500 }}>{sessionSlug === 'main' ? 'Main Session' : sessionSlug}</strong>
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <SectionLabel>Chat</SectionLabel>
+            <h1 style={{ fontFamily: sansFont, fontSize: 28, fontWeight: 300, color: NAVY, margin: 0, lineHeight: 1.2 }}>
+              <strong style={{ fontWeight: 500 }}>{currentSessionName}</strong>
+            </h1>
+          </div>
+          
+          {/* Session Dropdown */}
+          <div ref={dropdownRef} style={{ position: 'relative' }}>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowSessionDropdown(!showSessionDropdown)}
+              style={{
+                padding: '10px 16px',
+                background: '#fff',
+                border: '1px solid #e0e0f0',
+                borderRadius: 8,
+                color: NAVY,
+                fontFamily: monoFont,
+                fontSize: 11,
+                letterSpacing: '0.06em',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              SESSIONS
+              <span style={{ fontSize: 10 }}>{showSessionDropdown ? '▲' : '▼'}</span>
+            </motion.button>
+            
+            {showSessionDropdown && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  right: 0,
+                  marginTop: 8,
+                  background: '#fff',
+                  border: '1px solid #e0e0f0',
+                  borderRadius: 8,
+                  minWidth: 200,
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  zIndex: 100,
+                  overflow: 'hidden',
+                }}
+              >
+                {sessions.map((session) => (
+                  <div
+                    key={session.slug}
+                    onClick={() => handleSessionChange(session.slug)}
+                    style={{
+                      padding: '12px 16px',
+                      cursor: 'pointer',
+                      background: session.slug === sessionSlug ? LIGHT_BLUE : 'transparent',
+                      borderBottom: '1px solid #f0f0f0',
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = LIGHT_BLUE}
+                    onMouseLeave={(e) => e.currentTarget.style.background = session.slug === sessionSlug ? LIGHT_BLUE : 'transparent'}
+                  >
+                    <span style={{ fontFamily: sansFont, fontSize: 13, color: NAVY }}>
+                      {session.name}
+                    </span>
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Messages */}

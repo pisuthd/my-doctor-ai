@@ -278,6 +278,15 @@ app.whenReady().then(async () => {
 
   ipcMain.handle('ai:load', async () => {
     try {
+      // Don't reload if already loaded
+      if (modelId !== null) {
+        console.log('[AI] Model already loaded:', modelId)
+        return { 
+          success: true, 
+          status: getAIStatus()
+        }
+      }
+      
       // Check if model exists, if not download first
       const exists = await checkModelExists()
       
