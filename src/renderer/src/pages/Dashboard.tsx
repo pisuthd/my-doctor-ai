@@ -6,7 +6,7 @@ const BLUE = '#1A1AE8'
 const TEAL = '#3EC4C0'
 const NAVY = '#0a0a5c'
 const MUTED = '#9999bb'
-const LIGHT_BLUE = '#f7f7fc'
+// const LIGHT_BLUE = '#f7f7fc'
 
 const monoFont = "'Space Mono', monospace"
 const sansFont = "'DM Sans', sans-serif"
@@ -74,11 +74,9 @@ function StatItem({ label, value, subtext }: { label: string; value: string; sub
 }
 
 function formatUptime(seconds: number): string {
-  if (seconds < 60) return `${seconds}s`
-  if (seconds < 3600) return `${Math.floor(seconds / 60)}m ${seconds % 60}s`
-  const hours = Math.floor(seconds / 3600)
-  const mins = Math.floor((seconds % 3600) / 60)
-  return `${hours}h ${mins}m`
+  if (seconds < 60) return '<1m'
+  if (seconds < 3600) return `${Math.floor(seconds / 60)}m`
+  return `${Math.floor(seconds / 3600)}h`
 }
 
 export default function Dashboard() {
@@ -104,7 +102,7 @@ export default function Dashboard() {
     }
 
     fetchStatus()
-    const interval = setInterval(fetchStatus, 1000)
+    const interval = setInterval(fetchStatus, 3000)
     return () => clearInterval(interval)
   }, [])
 
@@ -178,7 +176,7 @@ export default function Dashboard() {
             />
             <StatItem 
               label="Status" 
-              value={aiStatus.isReady ? 'Ready' : aiStatus.downloading ? 'Downloading' : 'Not loaded'}
+              value={aiStatus.isReady ? 'Ready' : 'Loading'}
             />
             <StatItem 
               label="Uptime" 

@@ -288,13 +288,12 @@ app.whenReady().then(async () => {
         }
       }
       
-      // Load the model
-      const loaded = await loadAIModel()
+      // Load the model in background (fire and forget)
+      loadAIModel()
       
       return { 
-        success: loaded, 
-        status: getAIStatus(),
-        error: loaded ? undefined : 'Failed to load model'
+        success: true, 
+        status: getAIStatus()
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Unknown error'

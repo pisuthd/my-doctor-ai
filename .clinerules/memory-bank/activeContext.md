@@ -1,13 +1,14 @@
 # Active Context
 
 ## Current Work Focus
-- Phase 3: AI model loading with QVAC SDK
+- Phase 3.1: AI model loading with background load
 
 ## Recent Changes
-- Phase 3: Added QVAC AI model loading with download support
-- Model auto-downloads if missing from GitHub releases
-- Dashboard shows real AI status and uptime
-- Model stored at `{userData}/medpsy-1.7b-q4_k_m-imat.gguf`
+- Phase 3.1: Added QVAC AI model loading with fire-and-forget
+- Model downloads first, then loads in background
+- LoadingScreen proceeds after download
+- Dashboard polls status every 3 seconds
+- Uptime shows simplified format (<1m, 20m, 1h, 2h)
 
 ## Next Steps
 1. Integrate chat with AI model
@@ -15,9 +16,9 @@
 
 ## Active Decisions and Considerations
 - Using QVAC SDK for AI model management
-- Model downloaded on-demand if not found
-- Download progress shown in Dashboard
-- Model file ignored in Git (.gguf pattern)
+- Model file: medpsy-1.7b-q4_k_m-imat.gguf (local)
+- Download from GitHub releases if missing
+- Fire-and-forget loadAIModel() for non-blocking UX
 
 ## Important Patterns and Preferences
 - Blue gradient theme (Slack-style)
@@ -30,3 +31,4 @@
 - Electron app.getPath('userData') for persistent storage
 - IPC handle for async main-renderer communication
 - Preload script exposes API via contextBridge
+- @qvac/sdk ^0.10.2 works with local GGUF files
