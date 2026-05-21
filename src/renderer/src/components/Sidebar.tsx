@@ -19,8 +19,8 @@ const navItems = [
 
 function Wordmark() {
   return (
-    <p style={{ fontFamily: monoFont, fontWeight: 700, fontSize: 16, letterSpacing: '0.04em', color: BLUE, margin: 0 }}>
-      <span style={{ color: NAVY }}>My</span>DoctorAI
+    <p style={{ fontFamily: monoFont, fontWeight: 700, fontSize: 16, letterSpacing: '0.04em', color: NAVY, margin: 0 }}>
+      MedPsy
     </p>
   )
 }

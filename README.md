@@ -1,6 +1,6 @@
-# My Doctor AI
+# MedPsy Doctor
 
-A desktop application for virtual doctor consultations powered by local AI. Your health data stays private with local AI processing.
+A desktop application for AI-powered medical consultations with local privacy. Your health data stays on your device.
 
 ![Electron](https://img.shields.io/badge/Electron-191970?style=flat-square&logo=electron)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
@@ -58,7 +58,7 @@ A desktop application for virtual doctor consultations powered by local AI. Your
 ```bash
 # Clone the repository
 git clone https://github.com/pisuthd/my-doctor-ai.git
-cd my-doctor-ai
+cd medpsy-doctor
 
 # Install dependencies
 npm install

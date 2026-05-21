@@ -210,7 +210,7 @@ function createDefaultMenu(): void {
       label: 'Help',
       submenu: [
         {
-          label: 'About My Doctor AI',
+          label: 'About MedPsy Doctor',
           click: async () => {
             const { shell } = await import('electron')
             await shell.openExternal('https://github.com/pisuthd/my-doctor-ai')
@@ -257,7 +257,7 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 app.whenReady().then(async () => {
-  electronApp.setAppUserModelId('com.my-doctor-ai')
+  electronApp.setAppUserModelId('com.medpsy.doctor')
 
   createDefaultMenu()
 
@@ -498,7 +498,7 @@ app.whenReady().then(async () => {
   
   createWindow()
 
-  console.log('[App] My Doctor AI ready')
+  console.log('[App] MedPsy Doctor ready')
 
   app.on('activate', function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()

@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: my-doctor-ai
+appId: com.medpsy.doctor
+productName: MedPsy Doctor
 directories:
   buildResources: build
 files:
@@ -9,10 +9,15 @@ files:
   - '!{.eslintcache,eslint.config.mjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
-asarUnpack:
-  - resources/**
+asar: false
+npmRebuild: true
+extraResources:
+  - from: "node_modules/bare-runtime-win32-x64"
+    to: "bare-runtime-win32-x64"
+  - from: "node_modules/bare-runtime"
+    to: "bare-runtime"
 win:
-  executableName: my-doctor-ai
+  executableName: MedPsyDoctor
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -37,7 +42,6 @@ linux:
   category: Utility
 appImage:
   artifactName: ${name}-${version}.${ext}
-npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
