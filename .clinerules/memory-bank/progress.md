@@ -35,10 +35,14 @@
   - [x] ctx_size selector (2048, 4096, 8192)
   - [x] LoadingScreen error state with reload button
   - [x] settingsStore for persistent settings
+- [x] **Phase 6.1** Simplify nav + model reload
+  - [x] Remove Documents and Tools from sidebar (simplified nav)
+  - [x] Add model reload IPC handler (ai:reload)
+  - [x] Reload Model button in Settings page
+  - [x] Navigate to Chat after successful reload
 
 ## What's Left to Build
 - [ ] RAG implementation with embeddings (future)
-- [ ] Model reload when ctx_size changes
 
 ## Current Status
 - Phase 5: AI Tools with document access working

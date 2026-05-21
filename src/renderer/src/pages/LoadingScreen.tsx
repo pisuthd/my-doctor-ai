@@ -42,6 +42,16 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
     let isMounted = true
     let pollInterval: NodeJS.Timeout | null = null
 
+    // Listen for AI errors
+    const unsubscribe = window.api.ai.onError((error: string) => {
+      if (isMounted) {
+        console.log('[LoadingScreen] Received AI error:', error)
+        setState('error')
+        setErrorMessage(error || 'Failed to load AI model')
+        setStatusText('Error loading model')
+      }
+    })
+
     const checkStatus = async () => {
       try {
         const status: AIStatus = await window.api.ai.getStatus()
@@ -70,16 +80,14 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
         }
         
         // Calculate progress based on download or simulated loading
-        let newProgress = 0
         if (status.downloading) {
-          newProgress = status.downloadProgress
+          setProgress(status.downloadProgress)
           setStatusText(`Downloading MedPsy 1.7B... ${status.downloadProgress}%`)
         } else {
           // Simulate gradual progress during model loading
-          newProgress = Math.min(progress + Math.random() * 5, 90)
+          setProgress(prev => Math.min(prev + Math.random() * 3, 90))
           setStatusText('Loading AI model...')
         }
-        setProgress(newProgress)
         
       } catch (error) {
         if (isMounted) {
@@ -97,9 +105,10 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
 
     return () => {
       isMounted = false
+      unsubscribe()
       if (pollInterval) clearInterval(pollInterval)
     }
-  }, [onComplete, progress, state])
+  }, [onComplete, state])
 
   return (
     <div

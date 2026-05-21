@@ -531,6 +531,10 @@ app.whenReady().then(async () => {
       console.log('[AI] Startup model load complete')
     } else {
       console.log('[AI] Startup model load failed')
+      // Send error to renderer
+      if (mainWindowRef) {
+        mainWindowRef.webContents.send('ai:error', 'Failed to load AI model. Click Reload to try again.')
+      }
     }
   })()
   
