@@ -53,6 +53,12 @@ export default function Chat() {
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // Reset modal state when session changes
+  useEffect(() => {
+    setShowNewSessionModal(false)
+    setNewSessionName('')
+  }, [sessionSlug])
+
   // Load sessions for dropdown
   useEffect(() => {
     if (!profile) return
