@@ -187,7 +187,7 @@ export default function LoadingScreen({ onComplete }: { onComplete: () => void }
             marginBottom: '48px',
           }}
         >
-          <span style={{ color: NAVY }}>Med</span>Psy
+          <span style={{ color: NAVY }}>Med</span>Psy Doctor
         </p>
 
         {/* App label */}
